@@ -12,8 +12,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building application...'
-                // If using npm, Maven, etc., insert your build commands here
-                // Example: sh 'npm install'
             }
         }
 
