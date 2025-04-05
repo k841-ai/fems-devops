@@ -1,23 +1,35 @@
 pipeline {
     agent any
-
+    environment {
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    }
     stages {
+        stage('Checkout') {
+            steps {
+                echo 'Cloning source code...'
+            }
+        }
         stage('Build') {
             steps {
-                echo 'Building...'
+                echo 'Building application...'
             }
         }
-
-        stage('Test') {
+        stage('Docker Build') {
             steps {
-                echo 'Running tests...'
+                echo 'Building Docker image...'
+                sh 'docker build -t keisha841/fems-backend:latest .'
             }
         }
-
-        stage('Deploy') {
+        stage('Docker Push') {
             steps {
-                echo 'Deploying to server...'
+                echo 'Pushing Docker image...'
+                sh 'docker push keisha841/fems-backend:latest'
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline completed.'
         }
     }
 }
