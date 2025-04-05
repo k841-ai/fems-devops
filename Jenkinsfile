@@ -1,41 +1,28 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "keisha841/fashion-event-image"
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Cloning source code...'
-                checkout scm
+                sh 'docker build -t $DOCKER_IMAGE ./main'
             }
         }
 
-        stage('Build') {
+        stage('Login to Docker Hub') {
             steps {
-                echo 'Building application...'
-                // Add your build commands here
-            }
-        }
-
-        stage('Check Docker Access') {
-            steps {
-                sh 'which docker'
-                sh 'docker --version'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                echo 'Building Docker image...'
-                sh 'docker build -t yourdockerhubusername/fems-backend:latest .'
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                    sh 'docker push yourdockerhubusername/fems-backend:latest'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                 }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                sh 'docker push $DOCKER_IMAGE'
             }
         }
     }
